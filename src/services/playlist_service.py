@@ -65,7 +65,7 @@ class PlaylistService:
         )
 
     def _check_existing_playlist(self, user: User, name: str) -> str | None:
-        user_playlists = self.user_service.get_user_playlists(limit=100)
+        user_playlists = self.user_service.get_user_playlists(limit=50)
         for playlist in user_playlists:
             if playlist.name == name:
                 return playlist.id
