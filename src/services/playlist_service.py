@@ -289,8 +289,8 @@ class PlaylistService:
             )
 
         try:
-            playlist_data = self.sp.user_playlist_create(
-                user.id, playlist_name, public=True)
+            playlist_data = self.sp.current_user_playlist_create(
+                playlist_name, public=True)
             playlist = Playlist(
                 id=playlist_data["id"],
                 name=playlist_data["name"],
