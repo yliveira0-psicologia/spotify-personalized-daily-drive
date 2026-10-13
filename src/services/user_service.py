@@ -178,3 +178,34 @@ class UserService:
                 available.append(t)
 
         return available, unavailable
+
+    def search_new_tracks(self, artist_names: list[str], limit: int = 10) -> list[Track]:
+        """Search Spotify for tracks by artists related to the user's taste."""
+        discovered = []
+        seen_ids = set()
+
+        for artist_name in artist_names:
+            if len(discovered) >= limit:
+                break
+
+            try:
+                response = self.sp.search(
+                    q=f'artist:"{artist_name}"',
+                    type="track",
+                    limit=min(10, limit - len(discovered)),
+                )
+            except spotipy.SpotifyException:
+                continue
+
+            items = response.get("tracks", {}).get("items", []) if response else []
+
+            for item in items:
+                track = self._map_track(item)
+                if track.id and track.id not in seen_ids:
+                    seen_ids.add(track.id)
+                    discovered.append(track)
+
+                if len(discovered) >= limit:
+                    break
+
+        return discovered
