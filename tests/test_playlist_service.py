@@ -335,7 +335,7 @@ def test_add_structured_content_to_playlist_calls_sp(monkeypatch: object) -> Non
 
 def test_create_daily_drive_playlist_new(monkeypatch: object) -> None:
     class SP:
-        def user_playlist_create(self, user_id: str, name: str, *, public: bool = True) -> dict:
+        def current_user_playlist_create(self, name: str, *, public: bool = True) -> dict:
             return {
                 "id": "newid",
                 "name": name,
@@ -469,7 +469,7 @@ def test_add_structured_content_handles_spotify_exception() -> None:
 
 def test_create_daily_drive_playlist_handles_spotify_exception(monkeypatch: object) -> None:
     class SP:
-        def user_playlist_create(self, user_id: str, name: str, *, public: bool = True) -> None:
+        def current_user_playlist_create(self, name: str, *, public: bool = True) -> None:
             raise spotipy.SpotifyException(500, -1, "nope")
 
     sp = SP()
