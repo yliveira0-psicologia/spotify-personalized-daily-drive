@@ -62,7 +62,49 @@ def main() -> None:
         settings.daily_drive_tracks_between_episodes,
         settings.daily_drive_final_tracks,
     )
+
+    # Discover tracks based on the user's top artists
+    original_track_ids = {track.id for track in tracks if track.id}
+
+    artist_names = []
+    for time_range in ("short_term", "medium_term", "long_term"):
+        top_artists = user_service.get_user_top_artists(
+            time_range=time_range,
+            limit=20,
+        )
+        artist_names.extend(
+            artist.name for artist in top_artists if artist.name
+        )
+
+    artist_names = list(dict.fromkeys(artist_names))
+    discovered_tracks = user_service.search_new_tracks(
+        artist_names,
+        limit=100,
+    )
+
+    new_tracks = []
+    seen_ids = set(original_track_ids)
+
+    for track in discovered_tracks:
+        if track.id and track.id not in seen_ids:
+            new_tracks.append(track)
+            seen_ids.add(track.id)
+
+        if len(new_tracks) == 3:
+            break
+
+    # Preserve playlist length and replace only the last three tracks
     tracks = tracks[:required_track_count]
+
+    if len(tracks) >= 3 and len(new_tracks) == 3:
+        tracks = tracks[:-3] + new_tracks
+        log.info("Added 3 new track discoveries.")
+    else:
+        log.warning(
+            f"Found only {len(new_tracks)} new tracks; "
+            "keeping the original selection."
+        )
+
     log.info(
         f"Using {len(tracks)} tracks for the playlist structure "
         f"(required={required_track_count})."
